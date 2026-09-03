@@ -1,11 +1,11 @@
 name: Generate PlantUML Diagrams
 
-on:
+'on':
 push:
 branches:
 - main
 paths:
-- '**.puml'
+- '**/*.puml'
 
 workflow_dispatch:
 
