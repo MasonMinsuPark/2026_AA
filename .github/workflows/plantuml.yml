@@ -1,31 +1,39 @@
-yamlname: Generate PlantUML Diagrams
+name: Generate PlantUML Diagrams
+
 on:
-  push:
-    branches:
-      - main     # 본인의 메인 브랜치 이름 확인 (main 또는 master)
-    paths:
-      - '**.puml' # .puml 파일이 변경될 때만 실행
+push:
+branches:
+- main
+paths:
+- '**/*.puml'
+
+permissions:
+contents: write
 
 jobs:
-  generate_diagrams:
-    runs-on: ubuntu-latest
-    steps:
-      # 1. 최신 버전의 checkout 액션 사용
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
+generate-diagrams:
+runs-on: ubuntu-latest
 
-      # 2. 유효한 최신 PlantUML 액션으로 대체
-      - name: Process PlantUML
-        uses: Timmy/plantuml-action@v1
-        with:
-          args: -v -tpng **/*.puml # 프로젝트 내 모든 폴더의 .puml을 png로 변환
+steps:
+  - name: Checkout source code
+    uses: actions/checkout@v4
 
-      # 3. 변경 사항 커밋 및 푸시
-      - name: Commit and Push Changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          # 변경된 파일이 있을 때만 커밋 실행하여 에러 방지
-          git diff --quiet && git diff --staged --quiet || git commit -m "docs: Auto-generated PlantUML diagrams"
-          git push
+  - name: Generate PlantUML diagrams
+    uses: Timmy/plantuml-action@v1
+    with:
+      args: '-tpng "**/*.puml"'
+
+  - name: Commit and push generated diagrams
+    run: |
+      git config --local user.name "github-actions[bot]"
+      git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      git add '**/*.png'
+
+      if git diff --cached --quiet; then
+        echo "No diagram changes to commit."
+        exit 0
+      fi
+
+      git commit -m "docs: update PlantUML diagrams"
+      git push
