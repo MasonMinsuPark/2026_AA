@@ -1,7 +1,7 @@
 @startuml Class Diagram
 title Class Diagram
 
-skinparam shadowing false
+skinparam shadowing true
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 hide circle
