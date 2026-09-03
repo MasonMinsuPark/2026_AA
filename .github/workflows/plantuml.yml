@@ -5,7 +5,9 @@ push:
 branches:
 - main
 paths:
-- '**/*.puml'
+- '**.puml'
+
+workflow_dispatch:
 
 permissions:
 contents: write
@@ -15,20 +17,37 @@ generate-diagrams:
 runs-on: ubuntu-latest
 
 steps:
-  - name: Checkout source code
+  - name: Checkout repository
     uses: actions/checkout@v4
 
-  - name: Generate PlantUML diagrams
-    uses: Timmy/plantuml-action@v1
-    with:
-      args: '-tpng "**/*.puml"'
+  - name: Install PlantUML
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y plantuml
 
-  - name: Commit and push generated diagrams
+  - name: Find PlantUML files
+    run: |
+      echo "=== PlantUML files ==="
+      find . -type f -name "*.puml" -print
+
+  - name: Generate PNG diagrams
+    run: |
+      find . -type f -name "*.puml" -print0 | while IFS= read -r -d '' file; do
+        echo "Generating: $file"
+        plantuml -tpng "$file"
+      done
+
+  - name: Check generated PNG files
+    run: |
+      echo "=== Generated PNG files ==="
+      find . -type f -name "*.png" -print
+
+  - name: Commit and push diagrams
     run: |
       git config --local user.name "github-actions[bot]"
       git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      git add '**/*.png'
+      git add -A
 
       if git diff --cached --quiet; then
         echo "No diagram changes to commit."
