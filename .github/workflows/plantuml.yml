@@ -1,0 +1,27 @@
+name: Generate PlantUML Diagrams
+on:
+  push:
+    branches:
+      - main # 혹은 마스터 브랜치 이름
+    paths:
+      - '**.puml' # puml 파일이 변경될 때만 실행
+
+jobs:
+  generate_diagrams:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Process PlantUML
+        uses: cloudbees/plantuml-github-action@master
+        with:
+          args: -v -tpng diagrams/*.puml # diagrams 폴더 내 puml을 png로 변환 (경로 맞춤 조절 필요)
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "docs: Auto-generated PlantUML diagrams"
+          git push
